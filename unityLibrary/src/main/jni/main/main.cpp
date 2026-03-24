@@ -119,19 +119,19 @@ jboolean internal_unload(JNIEnv *env, void **libHandle)
 
 extern "C" {
 
-void set_override_unity_path(const char *path)
+void libmain_set_override_unity_path(const char *path)
 {
     override_unity_path = path;
     LOGI("set_override_unity_path: %s", path ? path : "(null)");
 }
 
-void set_override_il2cpp_path(const char *path)
+void libmain_set_override_il2cpp_path(const char *path)
 {
     override_il2cpp_path = path;
     LOGI("set_override_il2cpp_path: %s", path ? path : "(null)");
 }
 
-void set_log_path(const char *path)
+void libmain_set_log_path(const char *path)
 {
     log_path = path;
     if (logFile)

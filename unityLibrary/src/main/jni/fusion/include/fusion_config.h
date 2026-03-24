@@ -10,6 +10,8 @@ struct FusionConfig {
     bool useOriginalLibUnity;
 };
 
-FusionConfig parseFusionConfig(JNIEnv *env, jobject jFusionConfig);
+FusionConfig fusion_parse_config(JNIEnv *env, jobject jFusionConfig);
+
+void fusion_print_config(const FusionConfig &config);
 
 #endif //FUSION_FUSION_CONFIG_H

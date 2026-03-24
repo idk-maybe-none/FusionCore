@@ -40,6 +40,14 @@ bool il2cpp_initialize(const char *library_path)
     fun_il2cpp_init = reinterpret_cast<il2cpp_init_t>(p_il2cpp_init);
 
     p_il2cpp_runtime_invoke = dlsym(handle, "il2cpp_runtime_invoke");
+    void *resolved_runtime_invoke = resolve_inner_branch(p_il2cpp_runtime_invoke, 1);
+    if (resolved_runtime_invoke != p_il2cpp_runtime_invoke)
+    {
+        log_format(LogLevel::INFO, TAG, "Resolved il2cpp_runtime_invoke to inner branch target: 0x{:X}",
+            reinterpret_cast<uintptr_t>(resolved_runtime_invoke));
+        p_il2cpp_runtime_invoke = resolved_runtime_invoke;
+    }
+
     if (!p_il2cpp_runtime_invoke)
     {
         char *err = dlerror();

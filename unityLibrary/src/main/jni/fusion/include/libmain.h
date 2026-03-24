@@ -6,11 +6,11 @@
 extern "C" {
 #endif
 
-void set_override_unity_path(const char *path);
+void libmain_set_override_unity_path(const char *path);
 
-void set_override_il2cpp_path(const char *path);
+void libmain_set_override_il2cpp_path(const char *path);
 
-void set_log_path(const char *path);
+void libmain_set_log_path(const char *path);
 
 #ifdef __cplusplus
 }

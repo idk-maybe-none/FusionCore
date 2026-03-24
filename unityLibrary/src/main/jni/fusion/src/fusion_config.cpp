@@ -1,8 +1,11 @@
 // Copyright (c) 2026 XtraCube
 #include <fusion_config.h>
 #include <utilities/java.h>
+#include <logger.h>
 
-FusionConfig parseFusionConfig(JNIEnv *env, jobject jFusionConfig)
+#define TAG "FusionConfig"
+
+FusionConfig fusion_parse_config(JNIEnv *env, jobject jFusionConfig)
 {
     FusionConfig config;
 
@@ -27,4 +30,11 @@ FusionConfig parseFusionConfig(JNIEnv *env, jobject jFusionConfig)
     GET_JAVA_STRING(appLibsJString, config.appLibraryDirectory)
 
     return config;
+}
+
+void fusion_print_config(const FusionConfig &config)
+{
+    log_format(LogLevel::INFO, TAG, "Game Library Directory: {}", config.gameLibraryDirectory);
+    log_format(LogLevel::INFO, TAG, "App Library Directory: {}", config.appLibraryDirectory);
+    log_format(LogLevel::INFO, TAG, "Use Original libunity.so: {}", config.useOriginalLibUnity);
 }
