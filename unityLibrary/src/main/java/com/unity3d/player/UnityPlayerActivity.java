@@ -26,11 +26,6 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
     public Context m_context;
 
-    private static final String[] FusionLibraries = new String[]{
-            // "unity",
-            "main",
-    };
-
     protected String updateUnityCommandLineArguments(String cmdLine)
     {
         return cmdLine;
@@ -61,7 +56,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             ActivityBridge.loadFusion(config);
 
             // Setup native library hooks
-            // NativeLibraryManager.setupLibraryHooks(config);
+            NativeLibraryManager.setupLibraryHooks(config);
 
             // Create custom context to redirect stuff
             CustomContextWrapper wrappedContext = new CustomContextWrapper(gameContext, myContext, this);
