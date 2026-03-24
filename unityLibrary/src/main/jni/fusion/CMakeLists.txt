@@ -1,6 +1,6 @@
 project(fusion)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LIB_FOLDER ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI})
 
@@ -12,6 +12,7 @@ set(SOURCE_FILES src/fusion.cpp)
 
 add_library(fusion SHARED
         src/fusion.cpp
+        src/fusion_config.cpp
 )
 
 find_package(JNI REQUIRED)
