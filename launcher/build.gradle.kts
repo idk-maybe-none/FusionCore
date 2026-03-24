@@ -29,7 +29,8 @@ android {
         targetSdk = 36
         applicationId = "dev.allofus.fusioncore"
         ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.add("arm64-v8a")
+            // abiFilters.add("armeabi-v7a")
         }
         versionCode = 1
         versionName = "0.1"

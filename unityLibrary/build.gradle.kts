@@ -27,7 +27,8 @@ android {
     defaultConfig {
         minSdk = 22
         ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.add("arm64-v8a")
+            // abiFilters.add("armeabi-v7a")
         }
         consumerProguardFiles("proguard-unity.txt")
     }
