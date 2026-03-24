@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.Window;
 
 import dev.allofus.fusioncore.ActivityBridge;
+import dev.allofus.fusioncore.CustomContextWrapper;
 import dev.allofus.fusioncore.FusionConfig;
 
 public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecycleEvents
@@ -21,6 +22,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     public final String TARGET_GAME = "com.innersloth.spacemafia";
 
     protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+    public Context m_context;
 
     protected String updateUnityCommandLineArguments(String cmdLine)
     {
@@ -39,8 +41,12 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
         // ---------- FUSION CORE -------------
 
         try {
+
             Context myContext = this;
             Context gameContext = createPackageContext(TARGET_GAME, CONTEXT_IGNORE_SECURITY);
+            m_context = gameContext;
+
+            CustomContextWrapper wrappedContext = new CustomContextWrapper(gameContext, myContext, this);
 
             FusionConfig config = new FusionConfig(
                     gameContext.getApplicationInfo().nativeLibraryDir,
@@ -48,15 +54,16 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             );
 
             ActivityBridge.loadFusion(config);
+
+            mUnityPlayer = new UnityPlayer(wrappedContext, this);
+            UnityPlayer.currentActivity = this;
+            UnityPlayer.currentContext = wrappedContext;
+            setContentView(mUnityPlayer);
+            mUnityPlayer.requestFocus();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // ------------------------------------
-
-        mUnityPlayer = new UnityPlayer(this, this);
-        setContentView(mUnityPlayer);
-        mUnityPlayer.requestFocus();
     }
 
     // When Unity player unloaded move task to background

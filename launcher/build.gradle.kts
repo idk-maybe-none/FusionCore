@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 22
+        minSdk = 24
         targetSdk = 36
         applicationId = "dev.allofus.fusioncore"
         ndk {
