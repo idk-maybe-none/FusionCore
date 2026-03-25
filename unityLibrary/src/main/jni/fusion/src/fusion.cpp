@@ -11,6 +11,8 @@
 
 namespace fs = std::filesystem;
 
+static FusionConfig config;
+
 int il2cpp_init_hook(char *domain_name)
 {
     log_format(LogLevel::INFO, TAG, "il2cpp_init called with domain: {}", domain_name);
@@ -19,26 +21,24 @@ int il2cpp_init_hook(char *domain_name)
     // call the original il2cpp_init function
     int result = il2cpp_init(domain_name);
 
-    // TODO: initialize modloader
+    if (config.initialized)
+    {
+        // setup environment variables
+        setenv("FUSION_BEPINEX_PATH", config.bepinexPath.c_str(), 1);
+        setenv("FUSION_GAME_BINARY", libmain_get_override_il2cpp_path(), 1);
+        setenv("FUSION_GAME_DATA_DIR", config.gameDataDirectory.c_str(), 1);
+        setenv("FUSION_APP_DATA_DIR", config.appDataDirectory.c_str(), 1);
+        setenv("FUSION_UNITY_VERSION", "2021.3.45f1", 1);
+
+        // TODO: initialize modloader
+    }
+    else
+    {
+        log(LogLevel::WARN, TAG, "FusionConfig not initialized. Skipping modloader initialization.");
+    }
 
     log_format(LogLevel::INFO, TAG, "il2cpp_init returned: {}", result);
     return result;
-}
-
-void *il2cpp_runtime_invoke_hook(void *method, void *obj, void **params, void **exc)
-{
-    const char *methodName = il2cpp_method_get_name(method);
-    if (strcmp(methodName, "Internal_ActiveSceneChanged") == 0)
-    {
-        log(LogLevel::INFO, TAG, "Internal_ActiveSceneChanged called, invoking chainloader...");
-
-        // TODO: call chainloader here
-
-        il2cpp_destroy_runtime_invoke_hook();
-    }
-
-    // call the original il2cpp_runtime_invoke function
-    return il2cpp_runtime_invoke(method, obj, params, exc);
 }
 
 extern "C" JNIEXPORT void JNICALL loadFusion(
@@ -50,7 +50,7 @@ extern "C" JNIEXPORT void JNICALL loadFusion(
     log(LogLevel::INFO, TAG, "Loading FusionCore...");
 
     // Parse the configuration passed from Java
-    FusionConfig config = fusion_parse_config(env, nativeConfig);
+    config = fusion_parse_config(env, nativeConfig);
     fusion_print_config(config);
 
     // Construct paths to the game and app libraries
@@ -90,7 +90,6 @@ extern "C" JNIEXPORT void JNICALL loadFusion(
     // install il2cpp hooks
     log(LogLevel::INFO, TAG, "Installing il2cpp hooks...");
     il2cpp_install_init_hook(il2cpp_init_hook);
-    il2cpp_install_runtime_invoke_hook(il2cpp_runtime_invoke_hook);
     log(LogLevel::INFO, TAG, "il2cpp hooks installed successfully!");
 
     log(LogLevel::INFO, TAG, "FusionCore loaded successfully!");

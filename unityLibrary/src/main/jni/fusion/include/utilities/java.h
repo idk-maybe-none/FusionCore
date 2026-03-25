@@ -2,11 +2,11 @@
 #ifndef FUSIONCORE_JAVA_H
 #define FUSIONCORE_JAVA_H
 
-#define GET_JAVA_STRING(javaString, assignment) \
+#define GET_JAVA_STRING(env, javaString, assignment) \
     do { \
         const char *chars = (env)->GetStringUTFChars(javaString, nullptr); \
-        assignment = chars; \
+        assignment = std::string(chars); \
         (env)->ReleaseStringUTFChars(javaString, chars); \
-    } while(0);
+    } while(0)
 
 #endif //FUSIONCORE_JAVA_H

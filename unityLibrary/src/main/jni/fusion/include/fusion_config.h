@@ -5,9 +5,13 @@
 #include <jni.h>
 
 struct FusionConfig {
+    bool initialized;
+    bool useOriginalLibUnity;
     std::string gameLibraryDirectory;
     std::string appLibraryDirectory;
-    bool useOriginalLibUnity;
+    std::string gameDataDirectory;
+    std::string appDataDirectory;
+    std::string bepinexPath;
 };
 
 FusionConfig fusion_parse_config(JNIEnv *env, jobject jFusionConfig);

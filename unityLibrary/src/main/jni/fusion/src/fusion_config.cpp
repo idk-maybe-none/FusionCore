@@ -5,36 +5,43 @@
 
 #define TAG "FusionConfig"
 
+#define GET_JSTRING_FIELD(fieldName) \
+    jstring fieldName##JString = (jstring) env->GetObjectField(jFusionConfig, \
+                                                            env->GetFieldID(configClass, \
+                                                                            #fieldName, \
+                                                                            "Ljava/lang/String;")); \
+    GET_JAVA_STRING(env, fieldName##JString, config.fieldName)
+
+#define GET_JBOOLEAN_FIELD(fieldName) \
+    jboolean fieldName##JBoolean = env->GetBooleanField(jFusionConfig, \
+                                                        env->GetFieldID(configClass, \
+                                                                        #fieldName, \
+                                                                        "Z")); \
+    config.fieldName = (fieldName##JBoolean == JNI_TRUE)
+
 FusionConfig fusion_parse_config(JNIEnv *env, jobject jFusionConfig)
 {
     FusionConfig config;
 
     jclass configClass = env->GetObjectClass(jFusionConfig);
 
-    jstring gameLibsJString = (jstring) env->GetObjectField(jFusionConfig,
-                                                            env->GetFieldID(configClass,
-                                                                            "gameLibraryDirectory",
-                                                                            "Ljava/lang/String;"));
-    jstring appLibsJString = (jstring) env->GetObjectField(jFusionConfig,
-                                                           env->GetFieldID(configClass,
-                                                                           "appLibraryDirectory",
-                                                                           "Ljava/lang/String;"));
+    GET_JBOOLEAN_FIELD(useOriginalLibUnity);
 
-    jboolean useOriginalLibUnityJBoolean = env->GetBooleanField(jFusionConfig,
-                                                            env->GetFieldID(configClass,
-                                                                            "useOriginalLibUnity",
-                                                                            "Z"));
-
-    config.useOriginalLibUnity = useOriginalLibUnityJBoolean == JNI_TRUE;
-    GET_JAVA_STRING(gameLibsJString, config.gameLibraryDirectory)
-    GET_JAVA_STRING(appLibsJString, config.appLibraryDirectory)
+    GET_JSTRING_FIELD(gameLibraryDirectory);
+    GET_JSTRING_FIELD(appLibraryDirectory);
+    GET_JSTRING_FIELD(gameDataDirectory);
+    GET_JSTRING_FIELD(appDataDirectory);
+    GET_JSTRING_FIELD(bepinexPath);
 
     return config;
 }
 
 void fusion_print_config(const FusionConfig &config)
 {
+    log_format(LogLevel::DEBUG, TAG, "Use Original libunity.so: {}", config.useOriginalLibUnity);
     log_format(LogLevel::DEBUG, TAG, "Game Library Directory: {}", config.gameLibraryDirectory);
     log_format(LogLevel::DEBUG, TAG, "App Library Directory: {}", config.appLibraryDirectory);
-    log_format(LogLevel::DEBUG, TAG, "Use Original libunity.so: {}", config.useOriginalLibUnity);
+    log_format(LogLevel::DEBUG, TAG, "Game Data Directory: {}", config.gameDataDirectory);
+    log_format(LogLevel::DEBUG, TAG, "App Data Directory: {}", config.appDataDirectory);
+    log_format(LogLevel::DEBUG, TAG, "BepInEx Path: {}", config.bepinexPath);
 }

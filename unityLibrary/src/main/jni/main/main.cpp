@@ -131,6 +131,16 @@ void libmain_set_override_il2cpp_path(const char *path)
     LOGI("set_override_il2cpp_path: %s", path ? path : "(null)");
 }
 
+const char *libmain_get_override_unity_path()
+{
+    return override_unity_path.c_str();
+}
+
+const char *libmain_get_override_il2cpp_path()
+{
+    return override_il2cpp_path.c_str();
+}
+
 void libmain_set_log_path(const char *path)
 {
     log_path = path;
