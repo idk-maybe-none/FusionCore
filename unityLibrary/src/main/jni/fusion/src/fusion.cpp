@@ -99,28 +99,30 @@ extern "C" JNIEXPORT void JNICALL loadFusion(
     }
 
     // fix unstripped libunity problems
-    void *libunity_handle = xdl_open(libUnity.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    void *target = xdl_dsym(libunity_handle,
-                     "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb",
-                     nullptr
-                     );
-    if (!target)
     {
-        log_format(LogLevel::ERROR, TAG,
-            "Failed to find target function for scripting_method_invoke_hook: {}", dlerror());
-    }
-    else
-    {
-        if (
-                DobbyHook(target,
-                          reinterpret_cast<dobby_dummy_func_t>(scripting_method_invoke_hook),
-                          reinterpret_cast<dobby_dummy_func_t *>(&original_scripting_method_invoke))
-                == 0)
+        void *libunity_handle = xdl_open(libUnity.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        void *target = xdl_dsym(libunity_handle,
+                                "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb",
+                                nullptr
+        );
+        if (!target)
         {
-            log(LogLevel::INFO, TAG, "Successfully hooked scripting_method_invoke");
+            log_format(LogLevel::ERROR, TAG,
+                       "Failed to find target function for scripting_method_invoke_hook: {}",
+                       dlerror());
         } else
         {
-            log(LogLevel::ERROR, TAG, "Failed to hook scripting_method_invoke");
+            if (
+                    DobbyHook(target,
+                              reinterpret_cast<dobby_dummy_func_t>(scripting_method_invoke_hook),
+                              reinterpret_cast<dobby_dummy_func_t *>(&original_scripting_method_invoke))
+                    == 0)
+            {
+                log(LogLevel::INFO, TAG, "Successfully hooked scripting_method_invoke");
+            } else
+            {
+                log(LogLevel::ERROR, TAG, "Failed to hook scripting_method_invoke");
+            }
         }
     }
 
