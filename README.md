@@ -18,16 +18,13 @@ FusionCore automatically detects Unity version, then downloads the unstripped li
 
 ## Configuration
 
-1. Replace `unity-classes.jar` in `unityLibrary/libs` with the `classes.jar` from the exact Unity version used by the target game.
-   - Unity path example: `{Unity Install Path}\Editor\Data\PlaybackEngines\AndroidPlayer\Variations\il2cpp\Release\Classes\classes.jar`
-
-2. Set the target package in `unityLibrary/src/main/java/com/unity3d/player/UnityPlayerActivity.java`:
+1. Set the target package in `unityLibrary/src/main/java/dev/allofus/fusioncore/BootstrapActivity.java`:
    - `TARGET_GAME`
 
-3. Add/update `<queries><package ... /></queries>` in `unityLibrary/src/main/AndroidManifest.xml` for your target package.
+2. Add/update `<queries><package ... /></queries>` in `unityLibrary/src/main/AndroidManifest.xml` for your target package.
    - Android package visibility rules require this for package context lookup.
 
-4. Fix Unity-version-specific compile/runtime differences as needed. To help with this, you can export an empty Unity project using the Editor for your version and use it as a reference.
+3. Hope nothing breaks. If it does, report an issue with the logcat output.
 
 ## Build
 

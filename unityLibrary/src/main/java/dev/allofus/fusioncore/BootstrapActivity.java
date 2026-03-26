@@ -35,8 +35,6 @@ public class BootstrapActivity extends Activity {
     private static final AtomicBoolean FUSION_INITIALIZED = new AtomicBoolean(false);
     private static final AtomicBoolean NATIVE_LIBS_LOADED = new AtomicBoolean(false);
 
-    private CustomContextWrapper fusionContextWrapper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,12 +76,8 @@ public class BootstrapActivity extends Activity {
         final String launcherClassName = launcher.getClassName();
         final boolean useOriginalLibUnity = getIntent().getBooleanExtra(EXTRA_USE_ORIGINAL_LIBUNITY, false);
 
-        if (!installLauncherOnCreateHook(gameContext, launcherClassName, new BeforeOnCreateAction() {
-            @Override
-            public void run(Activity launcherActivity, Bundle bundle) {
-                initializeFusion(launcherActivity, gameContext, TARGET_PACKAGE, useOriginalLibUnity);
-            }
-        })) {
+        if (!installLauncherOnCreateHook(gameContext, launcherClassName,
+                (launcherActivity, bundle) -> initializeFusion(launcherActivity, gameContext, TARGET_PACKAGE, useOriginalLibUnity))) {
             finish();
             Toast.makeText(this, "Failed to install launcher hook! See log for details.", Toast.LENGTH_LONG).show();
             return;

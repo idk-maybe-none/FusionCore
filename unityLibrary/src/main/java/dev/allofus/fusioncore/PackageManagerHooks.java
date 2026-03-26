@@ -60,9 +60,10 @@ public class PackageManagerHooks {
             }
         });
     }
+
+    // temp true for testing, should be replaced with actual component name checks
     private static boolean isKnownExternalComponent(String componentName) {
-        // Google Play AssetPackDelivery components
-        return componentName != null && componentName.startsWith("com.google.android.play.core.assetpacks.");
+        return true; //componentName != null && componentName.startsWith("com.google.android.play.core.assetpacks.");
     }
 
     private static Method findMethodViaReflection(PackageManager manager) {

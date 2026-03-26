@@ -14,18 +14,11 @@ public class NativeLibraryManager {
 
     private static final ArrayList<String> GameLibraries = new ArrayList<>();
 
-    private static final ArrayList<String> FusionLibraries = new ArrayList<>();
-
     private static final ArrayList<String> DataLibraries = new ArrayList<>();
 
     public static void addGameLibrary(String gameLibName)
     {
         GameLibraries.add(gameLibName);
-    }
-
-    public static void addFusionLibrary(String fusionLibName)
-    {
-        FusionLibraries.add(fusionLibName);
     }
 
     public static void addDataLibrary(String dataLibName)
@@ -51,13 +44,6 @@ public class NativeLibraryManager {
                 for (String dataLib : DataLibraries) {
                     if (Objects.equals(libName, dataLib)) {
                         callFrame.setResult(config.appInternalDataDirectory + "/lib" + libName + ".so");
-                        return;
-                    }
-                }
-
-                for (String fusionLib : FusionLibraries) {
-                    if (Objects.equals(libName, fusionLib)) {
-                        callFrame.setResult(config.appLibraryDirectory + "/lib" + libName + ".so");
                         return;
                     }
                 }

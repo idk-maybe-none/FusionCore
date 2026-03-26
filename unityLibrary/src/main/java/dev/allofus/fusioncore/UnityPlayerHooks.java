@@ -17,7 +17,7 @@ public class UnityPlayerHooks {
             "com.unity3d.player.UnityPlayerForActivityOrService"
     };
 
-    public static void installHooks(Context gameContext) throws Exception {
+    public static void installHooks(Context gameContext) {
         var classLoader = BootstrapActivity.class.getClassLoader();
         if (classLoader == null) {
             throw new IllegalStateException("ClassLoader is null");

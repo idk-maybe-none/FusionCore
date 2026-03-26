@@ -25,9 +25,6 @@ public final class LibUnityDownloader {
     private static final String LIBUNITY_CACHE_META_FILE = "libunity.cache.properties";
     private static final Pattern UNITY_BASE_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
 
-    private LibUnityDownloader() {
-    }
-
     public static boolean downloadAndCacheSafely(File outputDir, String version) {
         FutureTask<Boolean> task = new FutureTask<>(() -> downloadAndCache(outputDir, version));
         Thread worker = new Thread(task, "FusionCore-LibUnityDownload");
