@@ -25,6 +25,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import dev.allofus.fusioncore.ActivityBridge;
+import dev.allofus.fusioncore.ClassLoaderHooks;
+import dev.allofus.fusioncore.PackageManagerHooks;
 import dev.allofus.fusioncore.CustomContextWrapper;
 import dev.allofus.fusioncore.FusionConfig;
 import dev.allofus.fusioncore.LibUnityDownloader;
@@ -62,6 +64,12 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             Context gameContext = createPackageContext(TARGET_GAME, CONTEXT_IGNORE_SECURITY);
             m_context = gameContext;
 
+            // setup classloader hooks for better game compat
+            ClassLoaderHooks.installHooks(gameContext.getClassLoader());
+
+            // setup packagemanager hooks to handle external component management
+            PackageManagerHooks.installHooks(getPackageManager());
+
             boolean useOriginalLibUnity = getIntent().getBooleanExtra("og_libunity", false);
 
             String gameLibDir = gameContext.getApplicationInfo().nativeLibraryDir;
@@ -72,12 +80,14 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
                 appDataDir = getFilesDir();
             }
 
+            // copy the games Data folder so we can determine Unity version and use metadata
             var copiedData = new File(appDataDir, "Data_copy");
             boolean copied = copyAssets(gameContext.getAssets(), "bin/Data", copiedData);
             if (!copied) {
                 Log.e(TAG, "Failed to copy Unity Data assets! BepInEx may not work correctly.");
             }
 
+            // lookup unity version
             String version = VersionLookup.TryLookup(copiedData);
             if (version == null) {
                 Log.e(TAG, "Failed to determine Unity version! BepInEx may not work correctly.");
@@ -95,6 +105,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
                 }
             }
 
+            // extract our embedded dependencies
             File bepInExDir = new File(appDataDir, "BepInEx");
             File dotnetDir = new File(appDataDir, "dotnet");
 
