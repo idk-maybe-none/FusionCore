@@ -100,7 +100,8 @@ extern "C" JNIEXPORT void JNICALL loadFusion(
 
     // fix unstripped libunity problems
     {
-        void *libunity_handle = xdl_open(libUnity.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        dlopen(libUnity.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        void *libunity_handle = xdl_open(libUnity.c_str(), XDL_DEFAULT);
         void *target = xdl_dsym(libunity_handle,
                                 "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb",
                                 nullptr
