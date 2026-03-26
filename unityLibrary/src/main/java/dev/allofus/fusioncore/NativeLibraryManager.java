@@ -4,10 +4,8 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
-import bitter.jnibridge.JNIBridge;
 import top.canyie.pine.Pine;
 import top.canyie.pine.callback.MethodHook;
 
@@ -83,12 +81,12 @@ public class NativeLibraryManager {
 
     private static Method findLibraryMethodViaReflection() {
         Method findLibraryMethod = null;
-        Class<?> clazz = Objects.requireNonNull(JNIBridge.class.getClassLoader()).getClass();
+        Class<?> clazz = Objects.requireNonNull(BootstrapActivity.class.getClassLoader()).getClass();
 
         while (findLibraryMethod == null && clazz != null) {
             try {
                 try {
-                    Class.forName(clazz.getName(), true, JNIBridge.class.getClassLoader());
+                    Class.forName(clazz.getName(), true, BootstrapActivity.class.getClassLoader());
                 } catch (ClassNotFoundException e) {
                     Log.wtf(TAG, "Class not found: " + clazz.getName(), e);
                 }
