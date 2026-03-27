@@ -24,7 +24,8 @@ FusionCore automatically detects Unity version, then downloads the unstripped li
 2. Add/update `<queries><package ... /></queries>` in `unityLibrary/src/main/AndroidManifest.xml` for your target package.
    - Android package visibility rules require this for package context lookup.
 
-3. Hope nothing breaks. If it does, report an issue with the logcat output.
+3. If the game uses a custom UnityPlayerActivity, add that to the `AndroidManifest.xml`.
+   - You can clone the existing activity declaration and change the name to match the game's custom activity.
 
 ## Build
 
