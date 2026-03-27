@@ -16,6 +16,16 @@ There is no Lemon/Melonloader support yet, just BepInEx Fusion (my custom fork o
 
 FusionCore automatically detects Unity version, then downloads the unstripped libunity.so file. You only need to follow the configuration steps below to make things work.
 
+## Can you add support for "X" game?
+
+Make a new issue with the following information:
+- Game name and version
+- Android package name (e.g. `com.example.game`)
+- Unity version (if known, otherwise I can check it myself)
+- Any other relevant information (e.g. if the game uses a custom UnityPlayerActivity, or if it has anti-cheat)
+
+We will try to add support, but there are no guarantees. If you want to help, you can also submit a pull request with the necessary changes to support the game.
+
 ## Configuration
 
 1. Set the target package in `unityLibrary/src/main/java/dev/allofus/fusioncore/BootstrapActivity.java`:
