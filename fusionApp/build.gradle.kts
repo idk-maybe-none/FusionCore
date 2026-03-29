@@ -55,7 +55,6 @@ android {
         jniLibs {
             useLegacyPackaging = true
             keepDebugSymbols += listOf("*/armeabi-v7a/*.so", "*/arm64-v8a/*.so")
-            excludes.add("**/libxdl.so")
         }
     }
 
