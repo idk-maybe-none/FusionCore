@@ -1,4 +1,5 @@
 // Copyright (c) 2026 XtraCube
+#include <unistd.h>
 #include <jni.h>
 #include <filesystem>
 #include <fstream>
@@ -137,6 +138,17 @@ int il2cpp_init_hook(char *domain_name)
         setenv("FUSION_GAME_DATA_DIR", runtimeConfig.unityDataDirectory.c_str(), 1);
         setenv("FUSION_APP_DATA_DIR", runtimeConfig.appDataDirectory.c_str(), 1);
         setenv("FUSION_UNITY_VERSION", runtimeConfig.unityVersion.c_str(), 1);
+
+        const char *ssl_cert_path = "/apex/com.android.conscrypt/cacerts";
+        const char *backup_cert_path = "/system/etc/security/cacerts";
+        if (access(ssl_cert_path, R_OK) == 0) {
+            setenv("SSL_CERT_DIR", ssl_cert_path, 1);
+        } else if (access(backup_cert_path, R_OK) == 0) {
+            setenv("SSL_CERT_DIR", backup_cert_path, 1);
+        } else {
+            log(LogLevel::WARN, TAG, "No readable SSL cert file found; HTTPS requests may fail.");
+        }
+        log_format(LogLevel::INFO, TAG, "Using {} for SSL certificates", getenv("SSL_CERT_DIR"));
 
         fs::path bepInExCoreDirectory = fs::path(runtimeConfig.bepInExDirectory) / "core";
 
