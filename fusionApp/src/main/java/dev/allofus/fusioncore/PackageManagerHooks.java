@@ -15,6 +15,9 @@ public class PackageManagerHooks {
             Log.w(TAG, "Failed to install PackageManager hooks", e);
         }
     }
+
+    // this prevents android from freaking out about components that only exist in the game manifest
+    // without it, android wont allow those components to be used
     private static void hookSetComponentEnabledSetting(PackageManager manager) {
 
         Method method = findMethodViaReflection(manager);

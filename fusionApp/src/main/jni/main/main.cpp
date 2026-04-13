@@ -30,7 +30,6 @@ static std::string override_il2cpp_path;
 
 static void *unityLibHandle = nullptr;
 static void *il2cppLibHandle = nullptr;
-static void *cryptoLibHandle = nullptr;
 
 static std::string build_sibling_library_path(const char *libraryFileName)
 {
@@ -434,12 +433,6 @@ unload(JNIEnv *env, jclass activityObject)
     {
         LOGE("unload: GetJavaVM failed");
         return JNI_FALSE; // Failed to obtain Java VM
-    }
-
-    if (cryptoLibHandle && !internal_unload(env, &cryptoLibHandle))
-    {
-        LOGE("unload: failed to unload crypto JNI library");
-        return JNI_FALSE;
     }
 
     if (unityLibHandle && !internal_unload(env, &unityLibHandle))

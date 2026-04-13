@@ -20,6 +20,8 @@ public class CustomContextWrapper extends ContextWrapper {
         super(gameContext);
         this.fusionContext = fusionContext;
         this.getApplicationInfo().dataDir = appContext.getApplicationInfo().dataDir;
+        // this prevents the game from resolving its own libraries
+        // that way we can override them properly with our own versions
         this.getApplicationInfo().nativeLibraryDir = "";
         this.appContext = appContext != fusionContext ? new CustomContextWrapper(this, appContext, appContext) : fusionContext;
     }

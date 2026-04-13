@@ -34,7 +34,6 @@ public class BootstrapActivity extends Activity {
 
     private final AtomicBoolean hookInstalled = new AtomicBoolean(false);
     private final AtomicBoolean fusionInitialized = new AtomicBoolean(false);
-    private final AtomicBoolean hostDexInjected = new AtomicBoolean(false);
 
     private TextView statusView;
     private TextView progressDetailsView;

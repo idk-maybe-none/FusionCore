@@ -35,6 +35,8 @@ public class ClassLoaderHooks {
         return loadClassMethod;
     }
 
+    // this is necessary for android to load classes from the game loader
+    // without this, starting the resolved activity fails.
     public static void installHooks(ClassLoader gameClassLoader) {
 
         Method loadClassMethod = loadClassMethodViaReflection();

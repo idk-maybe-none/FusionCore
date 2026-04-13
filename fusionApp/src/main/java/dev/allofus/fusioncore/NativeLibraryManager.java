@@ -33,6 +33,7 @@ public class NativeLibraryManager {
         DataLibraries.add(dataLibName);
     }
 
+    // this redirects library loading to the libraries we want the game to use
     public static void setupLibraryHooks(FusionConfig config) {
         Method findLibraryMethod = findLibraryMethodViaReflection();
 

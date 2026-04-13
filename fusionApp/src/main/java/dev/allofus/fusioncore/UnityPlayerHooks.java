@@ -31,6 +31,7 @@ public class UnityPlayerHooks {
             "com.unity3d.player.UnityPlayerForActivityOrService"
     };
 
+    // this is used to inject CustomContextWrapper into the game activity
     public static void installHooks(Context gameContext) {
         var classLoader = gameContext.getClassLoader();
         if (classLoader == null) {
