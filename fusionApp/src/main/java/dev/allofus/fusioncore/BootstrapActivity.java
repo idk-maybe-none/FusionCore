@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
@@ -344,8 +345,11 @@ public class BootstrapActivity extends Activity {
         }
 
         setPhaseStatus(getString(R.string.bootstrap_status_extracting_runtime));
-        File bepInExDir = new File(appDataDir, "BepInEx");
         File dotnetDir = new File(appDataDir, "dotnet");
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dataOnSdCard = new File(new File(sdCard, "FusionCore"), targetPackage);
+        File bepInExDir = new File(dataOnSdCard, "BepInEx");
 
         Utilities.extractZipFromAssets(appContext, "BepInEx-arm64.zip", bepInExDir);
         Utilities.extractZipFromAssets(appContext, "dotnet-arm64.zip", dotnetDir);

@@ -5,6 +5,9 @@
     <string name="selector_subtitle">Supported packages are listed below.</string>
     <string name="selector_empty_not_configured">No supported packages configured..</string>
     <string name="selector_empty_not_installed">No supported packages are currently installed.</string>
+    <string name="selector_storage_permission_prompt">Grant "All files access" so Fusion Core can write BepInEx files to Documents.</string>
+    <string name="selector_storage_permission_required">All files access is required to continue.</string>
+    <string name="selector_storage_permission_open_failed">Could not open storage permission settings.</string>
     <string name="bootstrap_title">Launching selected game</string>
     <string name="bootstrap_status_preparing">Preparing target package…</string>
     <string name="bootstrap_status_copy_assets">Copying Unity data…</string>
