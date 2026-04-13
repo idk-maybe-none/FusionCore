@@ -32,7 +32,7 @@ public class UnityPlayerHooks {
     };
 
     public static void installHooks(Context gameContext) {
-        var classLoader = BootstrapActivity.class.getClassLoader();
+        var classLoader = gameContext.getClassLoader();
         if (classLoader == null) {
             throw new IllegalStateException("ClassLoader is null");
         }

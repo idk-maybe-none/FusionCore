@@ -77,7 +77,7 @@ static bool preload_dotnet_runtime_libraries()
             "libSystem.Native.so",
             "libSystem.Globalization.Native.so",
             "libSystem.IO.Compression.Native.so",
-            "libSystem.Security.Cryptography.Native.Android.so"
+            "libSystem.Security.Cryptography.Native.OpenSsl.so"
     };
 
     for (const char *libraryName : required) {
@@ -380,17 +380,6 @@ load(JNIEnv *env, jobject activityObject, jstring path)
     LOGI("load: resolved staged config path=%s", configPath.c_str());
     if (!stageFromConfig(configPath.c_str())) {
         LOGE("load: fusion_stage_from_config_path failed");
-        return JNI_FALSE;
-    }
-
-    std::string cryptoLibPath = build_sibling_library_path("libSystem.Security.Cryptography.Native.Android.so");
-    if (cryptoLibPath.empty()) {
-        LOGE("load: failed to resolve crypto JNI library path");
-        return JNI_FALSE;
-    }
-
-    if (!internal_load(env, cryptoLibPath.c_str(), &cryptoLibHandle)) {
-        LOGE("load: failed to initialize crypto JNI library from %s", cryptoLibPath.c_str());
         return JNI_FALSE;
     }
 

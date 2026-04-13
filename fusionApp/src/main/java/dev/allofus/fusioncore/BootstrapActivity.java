@@ -95,14 +95,6 @@ public class BootstrapActivity extends Activity {
             return;
         }
 
-        try {
-            graftHostDexIntoGameClassLoader(gameContext.getClassLoader());
-            preloadCryptoClasses(gameContext.getClassLoader());
-        } catch (Throwable t) {
-            failAndFinish("Failed to inject host dex into game class loader", t);
-            return;
-        }
-
         setPhaseStatus(getString(R.string.bootstrap_status_installing_hooks));
         try {
             ClassLoaderHooks.installHooks(gameContext.getClassLoader());
@@ -409,68 +401,4 @@ public class BootstrapActivity extends Activity {
 
         return abi;
     }
-
-    private void graftHostDexIntoGameClassLoader(ClassLoader gameClassLoader) throws Exception {
-        if (!hostDexInjected.compareAndSet(false, true)) {
-            return;
-        }
-
-        if (!(gameClassLoader instanceof BaseDexClassLoader)) {
-            throw new IllegalStateException("Game class loader is not a BaseDexClassLoader: " + gameClassLoader);
-        }
-
-        String hostSourceDir = getApplicationInfo().sourceDir;
-        File optimizedDir = new File(getCodeCacheDir(), "hostdex");
-        if (!optimizedDir.exists() && !optimizedDir.mkdirs()) {
-            throw new IllegalStateException("Failed to create host dex optimization directory: " + optimizedDir);
-        }
-
-        DexClassLoader hostDexLoader = new DexClassLoader(
-                hostSourceDir,
-                optimizedDir.getAbsolutePath(),
-                null,
-                gameClassLoader.getParent()
-        );
-
-        Field pathListField = BaseDexClassLoader.class.getDeclaredField("pathList");
-        pathListField.setAccessible(true);
-
-        Object gamePathList = pathListField.get(gameClassLoader);
-        Object hostPathList = pathListField.get(hostDexLoader);
-
-        Field dexElementsField = gamePathList.getClass().getDeclaredField("dexElements");
-        dexElementsField.setAccessible(true);
-
-        Object gameElements = dexElementsField.get(gamePathList);
-        Object hostElements = dexElementsField.get(hostPathList);
-
-        int gameLen = Array.getLength(gameElements);
-        int hostLen = Array.getLength(hostElements);
-        Object merged = Array.newInstance(gameElements.getClass().getComponentType(), gameLen + hostLen);
-
-        for (int i = 0; i < gameLen; i++) {
-            Array.set(merged, i, Array.get(gameElements, i));
-        }
-        for (int i = 0; i < hostLen; i++) {
-            Array.set(merged, gameLen + i, Array.get(hostElements, i));
-        }
-
-        dexElementsField.set(gamePathList, merged);
-        Log.i(TAG, "Injected host dex into game class loader; gameElements=" + gameLen + " hostElements=" + hostLen);
-    }
-
-    private void preloadCryptoClasses(ClassLoader gameClassLoader) throws ClassNotFoundException {
-        String[] cryptoClasses = new String[] {
-                "net.dot.android.crypto.DotnetX509KeyManager",
-                "net.dot.android.crypto.DotnetProxyTrustManager",
-                "net.dot.android.crypto.PalPbkdf2"
-        };
-
-        for (String className : cryptoClasses) {
-            Class<?> clazz = Class.forName(className, true, gameClassLoader);
-            Log.i(TAG, "Preloaded crypto class via game loader: " + className + " loader=" + clazz.getClassLoader());
-        }
-    }
-
-    // Native runtime now boots from libmain inside Unity NativeLoader namespace.
 }
