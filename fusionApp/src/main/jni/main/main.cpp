@@ -89,8 +89,8 @@ static bool preload_dotnet_runtime_libraries()
     }
 
     // Optional diagnostics/profiling helpers used by some runtimes.
-    preload_sibling_library("libmscordbi.so");
     preload_sibling_library("libmscordaccore.so");
+    preload_sibling_library("libmscordbi.so");
     return true;
 }
 
