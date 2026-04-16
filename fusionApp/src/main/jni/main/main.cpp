@@ -250,27 +250,27 @@ jboolean internal_load(JNIEnv *env, const char *libraryPath, void **libHandle)
     {
         const char *err = dlerror();
         LOGE("dlsym JNI_OnLoad not found in '%s': %s", libraryPath, err ? err : "(no dlerror)");
-        dlclose(handle);
-        handle = nullptr;
-        return JNI_FALSE; // JNI_OnLoad symbol not found
+        // some libil2cpp.so do not have JNI_OnLoad, so we will not treat this as an error. Just log and continue.
     }
-
-    JavaVM *vm = nullptr;
-    if (env->GetJavaVM(&vm) != JNI_OK)
+    else
     {
-        LOGE("internal_load: GetJavaVM failed for '%s'", libraryPath);
-        dlclose(handle);
-        handle = nullptr;
-        return JNI_FALSE; // Failed to obtain Java VM
-    }
+        JavaVM *vm = nullptr;
+        if (env->GetJavaVM(&vm) != JNI_OK)
+        {
+            LOGE("internal_load: GetJavaVM failed for '%s'", libraryPath);
+            dlclose(handle);
+            handle = nullptr;
+            return JNI_FALSE; // Failed to obtain Java VM
+        }
 
-    jint result = jniOnLoad(vm, nullptr);
-    if (result < JNI_VERSION_1_6)
-    {
-        LOGE("JNI_OnLoad in '%s' returned version %d (expected >= %d)", libraryPath, result, JNI_VERSION_1_6);
-        dlclose(handle);
-        handle = nullptr;
-        return JNI_FALSE; // JNI version mismatch
+        jint result = jniOnLoad(vm, nullptr);
+        if (result < JNI_VERSION_1_6)
+        {
+            LOGE("JNI_OnLoad in '%s' returned version %d (expected >= %d)", libraryPath, result, JNI_VERSION_1_6);
+            dlclose(handle);
+            handle = nullptr;
+            return JNI_FALSE; // JNI version mismatch
+        }
     }
 
     *libHandle = handle;
