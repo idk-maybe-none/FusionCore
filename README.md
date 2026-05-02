@@ -43,11 +43,11 @@ We will try to add support, but there are no guarantees. If you want to help, yo
 Use the Gradle wrapper from the repository root:
 
 ```powershell
-.\gradlew.bat :fuisonApp:assembleDebug
+.\gradlew.bat :fusionApp:assembleDebug
 ```
 
 Optional clean build:
 
 ```powershell
-.\gradlew.bat clean :fuisonApp:assembleDebug
+.\gradlew.bat clean :fusionApp:assembleDebug
 ```
