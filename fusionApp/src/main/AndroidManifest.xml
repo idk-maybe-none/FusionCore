@@ -13,6 +13,7 @@
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
   <queries>
     <package android:name="com.innersloth.spacemafia" />
+    <package android:name="com.PhamThomas.NetLooter" />
     <package android:name="com.Earthkwak.Platformer" />
     <package android:name="com.antiherostudios.misfitz" />
     <package android:name="com.Radeon.RecRoom" />
