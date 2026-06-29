@@ -33,7 +33,7 @@ android {
     defaultConfig {
         minSdk = 24
         targetSdk = 36
-        applicationId = "dev.allofus.fusioncore"
+        applicationId = "dev.allofus.fusioncoredev"
         versionCode = 1
         versionName = "0.1"
         ndk {

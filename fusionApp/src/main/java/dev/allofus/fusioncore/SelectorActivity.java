@@ -40,7 +40,9 @@ public class SelectorActivity extends Activity {
             "com.antiherostudios.misfitz",
             "com.Radeon.RecRoom",
             "com.StefMorojna.SpaceflightSimulator",
-            "com.DanVogt.DATAWING"
+            "com.DanVogt.DATAWING",
+            "com.PhamThomas.NetLooter",
+            "com.vincentb.MobControl"
     };
 
     private String pendingLaunchPackage;

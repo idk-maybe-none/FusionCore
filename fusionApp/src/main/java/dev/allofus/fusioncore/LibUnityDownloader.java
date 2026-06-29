@@ -20,9 +20,9 @@ import java.util.zip.ZipInputStream;
 
 public final class LibUnityDownloader {
     private static final String TAG = "FusionCore";
-    private static final String LIBUNITY_DOWNLOAD_URL = "https://unity.bepinex.dev/android/";
+    private static final String LIBUNITY_DOWNLOAD_URL = "https://github.com/idk-maybe-none/MelonLoader.UnityDependencies/releases/download/";
     private static final String LIBUNITY_CACHE_META_FILE = "libunity.cache.properties";
-    private static final Pattern UNITY_BASE_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
+    private static final Pattern UNITY_BASE_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+f\\d+)");
 
     public interface DownloadProgressListener {
         void onDownloadStarted(String url, long totalBytes);
@@ -75,7 +75,6 @@ public final class LibUnityDownloader {
 
         File outputLibUnity = new File(outputDir, "libunity.so");
         File tempOutputLibUnity = new File(outputDir, "libunity.so.download");
-        File tempZipFile = new File(outputDir, "libunity.so.zip.download");
         File cacheMetaFile = new File(outputDir, LIBUNITY_CACHE_META_FILE);
         String trimmedVersion = version.trim();
         String downloadVersion = normalizeVersionForDownload(trimmedVersion);
@@ -91,7 +90,7 @@ public final class LibUnityDownloader {
             return true;
         }
 
-        String url = LIBUNITY_DOWNLOAD_URL + downloadVersion + "/" + currentAbi + ".zip";
+        String url = LIBUNITY_DOWNLOAD_URL + downloadVersion + "/libunity.so." + currentAbi;
         Log.i(TAG, "Downloading libunity from " + url);
 
         HttpURLConnection connection = null;
@@ -119,10 +118,10 @@ public final class LibUnityDownloader {
             long lastProgressDispatchMs = 0L;
 
             try (InputStream is = new BufferedInputStream(connection.getInputStream());
-                 FileOutputStream zipOut = new FileOutputStream(tempZipFile, false)) {
+                 FileOutputStream fos = new FileOutputStream(tempOutputLibUnity, false)) {
                 int count;
                 while ((count = is.read(buffer)) != -1) {
-                    zipOut.write(buffer, 0, count);
+                    fos.write(buffer, 0, count);
                     downloadedBytes += count;
 
                     long now = System.currentTimeMillis();
@@ -134,40 +133,6 @@ public final class LibUnityDownloader {
             }
 
             notifyDownloadProgress(progressListener, downloadedBytes, totalBytes);
-
-            try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(tempZipFile)))) {
-                ZipEntry entry;
-                while ((entry = zis.getNextEntry()) != null) {
-                    if (entry.isDirectory()) {
-                        zis.closeEntry();
-                        continue;
-                    }
-
-                    String entryName = entry.getName();
-                    String fileName = entryName == null ? "" : new File(entryName).getName();
-                    if (!"libunity.so".equals(fileName)) {
-                        zis.closeEntry();
-                        continue;
-                    }
-
-                    try (FileOutputStream fos = new FileOutputStream(tempOutputLibUnity, false)) {
-                        int count;
-                        while ((count = zis.read(buffer)) != -1) {
-                            fos.write(buffer, 0, count);
-                        }
-                    }
-
-                    extracted = true;
-                    zis.closeEntry();
-                    break;
-                }
-            }
-
-            if (!extracted) {
-                Log.e(TAG, "Downloaded zip did not contain libunity.so");
-                notifyDownloadFinished(progressListener, false, false);
-                return false;
-            }
 
             if (outputLibUnity.exists() && !outputLibUnity.delete()) {
                 Log.e(TAG, "Failed to replace existing libunity: " + outputLibUnity.getAbsolutePath());
@@ -195,9 +160,6 @@ public final class LibUnityDownloader {
         } finally {
             if (connection != null) {
                 connection.disconnect();
-            }
-            if (tempZipFile.exists() && !tempZipFile.delete()) {
-                Log.w(TAG, "Failed to clean temporary zip file: " + tempZipFile.getAbsolutePath());
             }
             if (tempOutputLibUnity.exists() && !outputLibUnity.exists() && !tempOutputLibUnity.delete()) {
                 Log.w(TAG, "Failed to clean temporary libunity file: " + tempOutputLibUnity.getAbsolutePath());
@@ -271,7 +233,7 @@ public final class LibUnityDownloader {
     private static String normalizeVersionForDownload(String version) {
         Matcher matcher = UNITY_BASE_VERSION_PATTERN.matcher(version);
         if (matcher.find()) {
-            return matcher.group(1);
+            return matcher.group(0);
         }
         return version;
     }
@@ -305,10 +267,12 @@ public final class LibUnityDownloader {
             case "armeabi":
             case "armv7":
                 return "armeabi-v7a";
-/*            case "x86":
+            case "armv9":
+                return "armv9";
+            case "x86":
                 return "x86";
             case "x86_64":
-                return "x86_64"; */
+                return "x86_64";
         }
 
         return null;
