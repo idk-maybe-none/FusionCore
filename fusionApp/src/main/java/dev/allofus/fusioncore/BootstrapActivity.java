@@ -129,8 +129,8 @@ public class BootstrapActivity extends Activity {
             runOnMainThread(() -> {
                 try {
                     var intent = new Intent(this, launcherClass);
+                    intent.addCategory("com.oculus.intent.category.VR");
                     startActivity(intent);
-                    finish();
                 } catch (Throwable t) {
                     failAndFinish("Failed to launch target app's launcher activity: " + launcherClassName, t);
                 }
@@ -278,20 +278,31 @@ public class BootstrapActivity extends Activity {
                         Resources gameRes = gameContext.getResources();
                         int themeId = gameRes.getIdentifier(
                                 "BaseUnityGameActivityTheme", "style", targetPackage);
-                        if (themeId != 0) {
-                            activity.setTheme(themeId);
-                            Log.i(TAG, "Applied game theme BaseUnityGameActivityTheme (0x" +
-                                    Integer.toHexString(themeId) + ") for " + targetPackage);
-                        } else {
+                        if (themeId == 0) {
                             themeId = gameRes.getIdentifier(
                                     "UnityThemeSelector", "style", targetPackage);
-                            if (themeId != 0) {
+                        }
+
+                        if (themeId != 0) {
+                            if (activity.getWindow() != null) {
                                 activity.setTheme(themeId);
-                                Log.i(TAG, "Applied fallback game theme UnityThemeSelector (0x" +
+                                Log.i(TAG, "Applied game theme (0x" +
                                         Integer.toHexString(themeId) + ") for " + targetPackage);
                             } else {
-                                Log.w(TAG, "Could not find game theme for " + targetPackage);
+                                // Window not yet available during attachBaseContext; apply after attach() completes
+                                final int deferredThemeId = themeId;
+                                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                    try {
+                                        activity.setTheme(deferredThemeId);
+                                        Log.i(TAG, "Applied deferred game theme (0x" +
+                                                Integer.toHexString(deferredThemeId) + ") for " + targetPackage);
+                                    } catch (Exception e) {
+                                        Log.w(TAG, "Could not apply deferred game theme", e);
+                                    }
+                                });
                             }
+                        } else {
+                            Log.w(TAG, "Could not find game theme for " + targetPackage);
                         }
 
                         // Also patch the Activity's mApplication field to point to the game's Application

@@ -4,3 +4,5 @@
 .cxx/
 build/
 local.properties
+/BepInExFusion
+/plugins

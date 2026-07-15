@@ -198,26 +198,26 @@ public class CustomContextWrapper extends ContextWrapper {
     @Override
     public Display getDisplay() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return fusionContext.getDisplay();
+            return super.getDisplay();
         }
         return null;
     }
 
     @Override
     public Object getSystemService(@NonNull String name) {
-        return fusionContext.getSystemService(name);
+        return super.getSystemService(name);
     }
 
+    // Must return fusionContext (a ContextWrapper subclass). Unity's native code (nativeRender)
+    // calls getApplicationInfo() via JNI using ContextWrapper.getApplicationInfo() as the method
+    // ID target. A raw ContextImpl (e.g. from createPackageContext or super.getApplicationContext())
+    // is not a ContextWrapper, so JNI throws: "can't call ContextWrapper.getApplicationInfo()
+    // on instance of ContextImpl". To properly fix this, we'd need to create a real Application
+    // instance for the target package running in our process, or patch the game's LoadedApk to
+    // carry its own Application — neither is trivial.
     @Override
     public Context getApplicationContext() {
         return fusionContext;
-        /*
-        Context gameAppContext = gameContext.getApplicationContext();
-        if (gameAppContext != null) {
-            return gameAppContext;
-        }
-        return appContext.getApplicationContext();
-        */
     }
 
     @Nullable

@@ -42,7 +42,9 @@ public class SelectorActivity extends Activity {
             "com.StefMorojna.SpaceflightSimulator",
             "com.DanVogt.DATAWING",
             "com.PhamThomas.NetLooter",
-            "com.vincentb.MobControl"
+            "com.vincentb.MobControl",
+            "com.AnotherAxiom.GorillaTag",
+            "com.cubsstash.scaryhorrormonkeys"
     };
 
     private String pendingLaunchPackage;
