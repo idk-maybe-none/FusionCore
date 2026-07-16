@@ -11,7 +11,7 @@
   <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
   <uses-feature android:name="android.software.home_screen" android:required="true" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-  <uses-feature android:name="android.hardware.vr.headtracking" android:required="true" android:version="1" />
+  <uses-feature android:name="android.hardware.vr.headtracking" android:required="false" android:version="1" />
   <uses-feature android:name="oculus.software.handtracking" android:required="false" />
   <uses-permission android:name="com.oculus.permission.HAND_TRACKING" />
   <queries>
@@ -40,13 +40,27 @@
     <meta-data android:name="notch.config" android:value="portrait|landscape" />
     <meta-data android:name="unity.auto-report-fully-drawn" android:value="true" />
     <meta-data android:name="com.google.android.gms.version" android:value="12451000" />
+    <meta-data android:name="com.unity.xr.oculus.LowOverheadMode" android:value="true"/>
+    <meta-data android:name="com.unity.xr.oculus.LateLatching" android:value="false"/>
+    <meta-data android:name="com.unity.xr.oculus.LateLatchingDebug" android:value="false"/>
+    <meta-data android:name="com.oculus.supportedDevices" android:value="quest|quest2|cambria"/>
     <activity android:name="com.unity3d.player.UnityPlayerActivity" android:process=":vr" android:theme="@style/UnityThemeSelector" android:screenOrientation="fullUser" android:launchMode="singleTask" android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:resizeableActivity="false" android:hardwareAccelerated="false" android:windowLayoutInDisplayCutoutMode="shortEdges" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="com.oculus.intent.category.VR"/>
+      </intent-filter>
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
       <meta-data android:name="notch_support" android:value="true" />
+      <meta-data android:name="com.oculus.vr.focusaware" android:value="true"/>
     </activity>
     <activity android:name="com.unity3d.player.UnityPlayerGameActivity" android:process=":vr" android:theme="@style/BaseUnityGameActivityTheme" android:screenOrientation="fullUser" android:launchMode="singleTask" android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:resizeableActivity="false" android:hardwareAccelerated="false" android:windowLayoutInDisplayCutoutMode="shortEdges" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="com.oculus.intent.category.VR"/>
+      </intent-filter>
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
       <meta-data android:name="notch_support" android:value="true" />
+      <meta-data android:name="com.oculus.vr.focusaware" android:value="true"/>
     </activity>
     <activity android:name="com.innersloth.spacemafia.EosUnityPlayerActivity" android:theme="@style/UnityThemeSelector" android:screenOrientation="fullUser" android:launchMode="singleTask" android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:resizeableActivity="false" android:hardwareAccelerated="false" android:windowLayoutInDisplayCutoutMode="shortEdges" android:exported="true">
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
@@ -62,8 +76,8 @@
     </activity>
     <activity android:name="dev.allofus.fusioncore.SelectorActivity" android:theme="@style/AppTheme" android:exported="true">
       <intent-filter>
-        <category android:name="android.intent.category.LAUNCHER" />
         <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
     <activity
@@ -75,7 +89,6 @@
         <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
         <intent-filter>
           <action android:name="android.intent.action.MAIN" />
-          <category android:name="android.intent.category.LAUNCHER" />
           <category android:name="com.oculus.intent.category.VR" />
         </intent-filter>
     </activity>
