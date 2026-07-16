@@ -24,4 +24,6 @@
     <string name="bootstrap_status_launching">Launching game…</string>
     <string name="bootstrap_status_error">Launch failed</string>
     <string name="bootstrap_download_progress">%1$d%% (%2$s / %3$s)</string>
+    <string name="settings_experimental_downloader_title">Experimental libunity downloader</string>
+    <string name="settings_experimental_downloader_desc">Use the new experimental libunity source instead of the legacy BepInEx source.</string>
 </resources>

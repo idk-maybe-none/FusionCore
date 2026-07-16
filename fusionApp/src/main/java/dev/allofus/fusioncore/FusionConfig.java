@@ -10,7 +10,8 @@ public class FusionConfig {
             String dotnetDir,
             String unityDataDir,
             String unityVersion,
-            boolean useOriginalLibUnity
+            boolean useOriginalLibUnity,
+            boolean useExperimentalLibUnity
     ) {
         this.gameLibraryDirectory = gameLibDir;
         this.appLibraryDirectory = appLibDir;
@@ -20,6 +21,7 @@ public class FusionConfig {
         this.unityDataDirectory = unityDataDir;
         this.unityVersion = unityVersion;
         this.useOriginalLibUnity = useOriginalLibUnity;
+        this.useExperimentalLibUnity = useExperimentalLibUnity;
     }
 
     /// The directory where Fusion's native libraries are located.
@@ -45,4 +47,7 @@ public class FusionConfig {
 
     /// Whether to use the original libunity.so from the game or the one provided by Fusion.
     public boolean useOriginalLibUnity;
+
+    /// Whether the downloaded libunity was fetched using the experimental (new) downloader.
+    public boolean useExperimentalLibUnity;
 }

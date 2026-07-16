@@ -24,5 +24,10 @@ public class SettingsActivity extends Activity {
         libUnityToggle.setChecked(FusionSettings.isDownloadUnstrippedLibUnity(this));
         libUnityToggle.setOnCheckedChangeListener(
                 (button, isChecked) -> FusionSettings.setDownloadUnstrippedLibUnity(this, isChecked));
+
+        Switch experimentalToggle = findViewById(R.id.settings_experimental_downloader_toggle);
+        experimentalToggle.setChecked(FusionSettings.isUseExperimentalDownloader(this));
+        experimentalToggle.setOnCheckedChangeListener(
+                (button, isChecked) -> FusionSettings.setUseExperimentalDownloader(this, isChecked));
     }
 }

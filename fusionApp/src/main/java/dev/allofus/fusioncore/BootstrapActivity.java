@@ -431,6 +431,8 @@ public class BootstrapActivity extends Activity {
 
         setPhaseStatus(getString(R.string.bootstrap_status_detecting_version));
         String version = VersionLookup.TryLookup(copiedData);
+        boolean useExperimentalDownloader = FusionSettings.isUseExperimentalDownloader(appContext);
+        boolean useExperimentalLibUnity = false;
         if (version == null) {
             Log.e(TAG, "Failed to determine Unity version! BepInEx may not work correctly.");
             version = BACKUP_UNITY_VERSION;
@@ -439,8 +441,8 @@ public class BootstrapActivity extends Activity {
             Log.i(TAG, "Skipping libunity download");
             useOriginalLibUnity = true;
         } else {
-            Log.i(TAG, "Determined Unity version: " + version);
-            if (LibUnityDownloader.downloadAndCacheSafely(appDataDir, version, targetGameAbi, new LibUnityDownloader.DownloadProgressListener() {
+            Log.i(TAG, "Determined Unity version: " + version + (useExperimentalDownloader ? " (experimental downloader)" : ""));
+            if (LibUnityDownloader.downloadAndCacheSafely(appDataDir, version, targetGameAbi, useExperimentalDownloader, new LibUnityDownloader.DownloadProgressListener() {
                 @Override
                 public void onDownloadStarted(String url, long totalBytes) {
                     setDownloadStatus(0L, totalBytes);
@@ -457,6 +459,7 @@ public class BootstrapActivity extends Activity {
                 }
             })) {
                 Log.i(TAG, "Successfully downloaded libunity for version " + version + " and ABI " + targetGameAbi);
+                useExperimentalLibUnity = useExperimentalDownloader;
             } else {
                 Log.e(TAG, "Failed to download libunity for version " + version + " and ABI " + targetGameAbi + ", falling back to original.");
                 useOriginalLibUnity = true;
@@ -493,7 +496,8 @@ public class BootstrapActivity extends Activity {
                 dotnetDir.getAbsolutePath(),
                 copiedData.getAbsolutePath(),
                 version,
-                useOriginalLibUnity
+                useOriginalLibUnity,
+                useExperimentalLibUnity
         );
 
         return new PreparedFusionState(targetPackage, config);

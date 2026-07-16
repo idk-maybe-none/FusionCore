@@ -20,9 +20,18 @@ import java.util.zip.ZipInputStream;
 
 public final class LibUnityDownloader {
     private static final String TAG = "FusionCore";
-    private static final String LIBUNITY_DOWNLOAD_URL = "https://github.com/idk-maybe-none/MelonLoader.UnityDependencies/releases/download/";
-    private static final String LIBUNITY_CACHE_META_FILE = "libunity.cache.properties";
-    private static final Pattern UNITY_BASE_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+f\\d+)");
+
+    private static final String OLD_LIBUNITY_DOWNLOAD_URL = "https://unity.bepinex.dev/android/";
+    private static final String NEW_LIBUNITY_DOWNLOAD_URL = "https://github.com/idk-maybe-none/MelonLoader.UnityDependencies/releases/download/";
+
+    private static final String OLD_CACHE_META_FILE = "libunity.cache.properties";
+    private static final String NEW_CACHE_META_FILE = "libunity_exp.cache.properties";
+
+    private static final String OLD_OUTPUT_FILE = "libunity.so";
+    private static final String NEW_OUTPUT_FILE = "libunity_exp.so";
+
+    private static final Pattern OLD_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
+    private static final Pattern NEW_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+f\\d+)");
 
     public interface DownloadProgressListener {
         void onDownloadStarted(String url, long totalBytes);
@@ -33,8 +42,9 @@ public final class LibUnityDownloader {
     public static boolean downloadAndCacheSafely(File outputDir,
                                                  String version,
                                                  String targetGameAbi,
+                                                 boolean experimental,
                                                  DownloadProgressListener progressListener) {
-        FutureTask<Boolean> task = new FutureTask<>(() -> downloadAndCache(outputDir, version, targetGameAbi, progressListener));
+        FutureTask<Boolean> task = new FutureTask<>(() -> downloadAndCache(outputDir, version, targetGameAbi, experimental, progressListener));
         Thread worker = new Thread(task, "FusionCore-LibUnityDownload");
         worker.start();
 
@@ -53,6 +63,7 @@ public final class LibUnityDownloader {
     public static boolean downloadAndCache(File outputDir,
                                            String version,
                                            String targetGameAbi,
+                                           boolean experimental,
                                            DownloadProgressListener progressListener) {
         if (outputDir == null || version == null || version.trim().isEmpty()) {
             Log.e(TAG, "downloadAndCache called with invalid arguments");
@@ -73,12 +84,18 @@ public final class LibUnityDownloader {
             return false;
         }
 
-        File outputLibUnity = new File(outputDir, "libunity.so");
-        File tempOutputLibUnity = new File(outputDir, "libunity.so.download");
-        File cacheMetaFile = new File(outputDir, LIBUNITY_CACHE_META_FILE);
+        String outputFileName = experimental ? NEW_OUTPUT_FILE : OLD_OUTPUT_FILE;
+        String cacheMetaFileName = experimental ? NEW_CACHE_META_FILE : OLD_CACHE_META_FILE;
+        String downloadUrl = experimental ? NEW_LIBUNITY_DOWNLOAD_URL : OLD_LIBUNITY_DOWNLOAD_URL;
+        Pattern versionPattern = experimental ? NEW_VERSION_PATTERN : OLD_VERSION_PATTERN;
+
+        File outputLibUnity = new File(outputDir, outputFileName);
+        File tempOutputLibUnity = new File(outputDir, outputFileName + ".download");
+        File tempZipFile = new File(outputDir, outputFileName + ".zip.download");
+        File cacheMetaFile = new File(outputDir, cacheMetaFileName);
         String trimmedVersion = version.trim();
-        String downloadVersion = normalizeVersionForDownload(trimmedVersion);
-        String cacheKey = downloadVersion + "|" + currentAbi;
+        String downloadVersion = normalizeVersionForDownload(trimmedVersion, versionPattern);
+        String cacheKey = downloadVersion + "|" + currentAbi + "|" + (experimental ? "new" : "old");
 
         if (!trimmedVersion.equals(downloadVersion)) {
             Log.i(TAG, "Normalized Unity version for download URL: " + trimmedVersion + " -> " + downloadVersion);
@@ -90,11 +107,28 @@ public final class LibUnityDownloader {
             return true;
         }
 
-        String url = LIBUNITY_DOWNLOAD_URL + downloadVersion + "/libunity.so." + currentAbi;
-        Log.i(TAG, "Downloading libunity from " + url);
+        if (experimental) {
+            return downloadExperimental(outputDir, outputLibUnity, tempOutputLibUnity, cacheMetaFile,
+                    downloadUrl, downloadVersion, currentAbi, cacheKey, progressListener);
+        } else {
+            return downloadOld(outputLibUnity, tempOutputLibUnity, tempZipFile, cacheMetaFile,
+                    downloadUrl, downloadVersion, currentAbi, cacheKey, progressListener);
+        }
+    }
+
+    private static boolean downloadExperimental(File outputDir,
+                                                File outputLibUnity,
+                                                File tempOutputLibUnity,
+                                                File cacheMetaFile,
+                                                String baseUrl,
+                                                String downloadVersion,
+                                                String currentAbi,
+                                                String cacheKey,
+                                                DownloadProgressListener progressListener) {
+        String url = baseUrl + downloadVersion + "/libunity.so." + currentAbi;
+        Log.i(TAG, "Downloading libunity (experimental) from " + url);
 
         HttpURLConnection connection = null;
-        boolean extracted = false;
 
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
@@ -105,7 +139,7 @@ public final class LibUnityDownloader {
 
             int statusCode = connection.getResponseCode();
             if (statusCode < 200 || statusCode >= 300) {
-                Log.e(TAG, "Failed to download libunity zip, HTTP " + statusCode);
+                Log.e(TAG, "Failed to download libunity (experimental), HTTP " + statusCode);
                 notifyDownloadFinished(progressListener, false, false);
                 return false;
             }
@@ -150,16 +184,139 @@ public final class LibUnityDownloader {
                 Log.w(TAG, "Downloaded libunity but failed to update cache metadata");
             }
 
-            Log.i(TAG, "Successfully downloaded libunity to " + outputLibUnity.getAbsolutePath());
+            Log.i(TAG, "Successfully downloaded libunity (experimental) to " + outputLibUnity.getAbsolutePath());
             notifyDownloadFinished(progressListener, true, false);
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "Failed to download libunity", e);
+            Log.e(TAG, "Failed to download libunity (experimental)", e);
             notifyDownloadFinished(progressListener, false, false);
             return false;
         } finally {
             if (connection != null) {
                 connection.disconnect();
+            }
+            if (tempOutputLibUnity.exists() && !outputLibUnity.exists() && !tempOutputLibUnity.delete()) {
+                Log.w(TAG, "Failed to clean temporary libunity file: " + tempOutputLibUnity.getAbsolutePath());
+            }
+        }
+    }
+
+    private static boolean downloadOld(File outputLibUnity,
+                                       File tempOutputLibUnity,
+                                       File tempZipFile,
+                                       File cacheMetaFile,
+                                       String baseUrl,
+                                       String downloadVersion,
+                                       String currentAbi,
+                                       String cacheKey,
+                                       DownloadProgressListener progressListener) {
+        String url = baseUrl + downloadVersion + "/" + currentAbi + ".zip";
+        Log.i(TAG, "Downloading libunity (old) from " + url);
+
+        HttpURLConnection connection = null;
+        boolean extracted = false;
+
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(30000);
+            connection.setInstanceFollowRedirects(true);
+
+            int statusCode = connection.getResponseCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                Log.e(TAG, "Failed to download libunity zip (old), HTTP " + statusCode);
+                notifyDownloadFinished(progressListener, false, false);
+                return false;
+            }
+
+            long totalBytes = connection.getContentLengthLong();
+            notifyDownloadStarted(progressListener, url, totalBytes);
+
+            byte[] buffer = new byte[8192];
+            long downloadedBytes = 0L;
+            long lastProgressDispatchMs = 0L;
+
+            try (InputStream is = new BufferedInputStream(connection.getInputStream());
+                 FileOutputStream zipOut = new FileOutputStream(tempZipFile, false)) {
+                int count;
+                while ((count = is.read(buffer)) != -1) {
+                    zipOut.write(buffer, 0, count);
+                    downloadedBytes += count;
+
+                    long now = System.currentTimeMillis();
+                    if (now - lastProgressDispatchMs >= 120L) {
+                        notifyDownloadProgress(progressListener, downloadedBytes, totalBytes);
+                        lastProgressDispatchMs = now;
+                    }
+                }
+            }
+
+            notifyDownloadProgress(progressListener, downloadedBytes, totalBytes);
+
+            try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(tempZipFile)))) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    if (entry.isDirectory()) {
+                        zis.closeEntry();
+                        continue;
+                    }
+
+                    String entryName = entry.getName();
+                    String fileName = entryName == null ? "" : new File(entryName).getName();
+                    if (!"libunity.so".equals(fileName)) {
+                        zis.closeEntry();
+                        continue;
+                    }
+
+                    try (FileOutputStream fos = new FileOutputStream(tempOutputLibUnity, false)) {
+                        int count;
+                        while ((count = zis.read(buffer)) != -1) {
+                            fos.write(buffer, 0, count);
+                        }
+                    }
+
+                    extracted = true;
+                    zis.closeEntry();
+                    break;
+                }
+            }
+
+            if (!extracted) {
+                Log.e(TAG, "Downloaded zip did not contain libunity.so (old)");
+                notifyDownloadFinished(progressListener, false, false);
+                return false;
+            }
+
+            if (outputLibUnity.exists() && !outputLibUnity.delete()) {
+                Log.e(TAG, "Failed to replace existing libunity: " + outputLibUnity.getAbsolutePath());
+                notifyDownloadFinished(progressListener, false, false);
+                return false;
+            }
+
+            if (!tempOutputLibUnity.renameTo(outputLibUnity)) {
+                Log.e(TAG, "Failed to move downloaded libunity into place");
+                notifyDownloadFinished(progressListener, false, false);
+                return false;
+            }
+
+            if (!writeLibUnityCacheMeta(cacheMetaFile, cacheKey, outputLibUnity.length())) {
+                Log.w(TAG, "Downloaded libunity but failed to update cache metadata");
+            }
+
+            Log.i(TAG, "Successfully downloaded libunity (old) to " + outputLibUnity.getAbsolutePath());
+            notifyDownloadFinished(progressListener, true, false);
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to download libunity (old)", e);
+            notifyDownloadFinished(progressListener, false, false);
+            return false;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            if (tempZipFile.exists() && !tempZipFile.delete()) {
+                Log.w(TAG, "Failed to clean temporary zip file: " + tempZipFile.getAbsolutePath());
             }
             if (tempOutputLibUnity.exists() && !outputLibUnity.exists() && !tempOutputLibUnity.delete()) {
                 Log.w(TAG, "Failed to clean temporary libunity file: " + tempOutputLibUnity.getAbsolutePath());
@@ -230,8 +387,8 @@ public final class LibUnityDownloader {
         }
     }
 
-    private static String normalizeVersionForDownload(String version) {
-        Matcher matcher = UNITY_BASE_VERSION_PATTERN.matcher(version);
+    private static String normalizeVersionForDownload(String version, Pattern versionPattern) {
+        Matcher matcher = versionPattern.matcher(version);
         if (matcher.find()) {
             return matcher.group(0);
         }

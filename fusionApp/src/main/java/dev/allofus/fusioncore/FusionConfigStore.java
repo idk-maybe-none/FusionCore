@@ -36,6 +36,7 @@ public final class FusionConfigStore {
             writeLine(writer, "unityDataDirectory", config.unityDataDirectory);
             writeLine(writer, "unityVersion", config.unityVersion);
             writeLine(writer, "useOriginalLibUnity", Boolean.toString(config.useOriginalLibUnity));
+            writeLine(writer, "useExperimentalLibUnity", Boolean.toString(config.useExperimentalLibUnity));
         }
 
         return configFile;
