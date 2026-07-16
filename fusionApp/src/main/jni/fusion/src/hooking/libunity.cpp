@@ -21,12 +21,14 @@ void* scripting_method_invoke_hook(void* method, void* obj, void* args, void* ex
 
 void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLibUnityPath) {
 
-    void *handle = dlopen(libUnityPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+    void *handle = dlopen(libUnityPath.c_str(), RTLD_NOW | RTLD_LOCAL);
     if (!handle)
     {
         log_format(LogLevel::ERROR, TAG,
                    "Failed to load libunity for hooking: {}. Error: {}",
                    libUnityPath.c_str(), dlerror());
+        libUnityPath = fallbackLibUnityPath;
+        return;
     }
     struct dl_phdr_info unity_info = {0};
     dl_iterate_phdr(
@@ -49,6 +51,9 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
         log_format(LogLevel::ERROR, TAG,
                    "Failed to xdl_open libunity for hooking: {}",
                    libUnityPath.c_str());
+        dlclose(handle);
+        libUnityPath = fallbackLibUnityPath;
+        return;
     }
     void *target = xdl_dsym(libunity_handle,
                             "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb",
@@ -58,8 +63,8 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
     {
         log(LogLevel::ERROR, TAG,
             "Failed to find target function for scripting_method_invoke_hook!");
-
-        // reset libunity path
+        xdl_close(libunity_handle);
+        dlclose(handle);
         libUnityPath = fallbackLibUnityPath;
     }
     else
@@ -75,7 +80,9 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
         else
         {
             log(LogLevel::ERROR, TAG, "Failed to hook scripting_method_invoke");
-            // reset libunity path
+
+            xdl_close(libunity_handle);
+            dlclose(handle);
             libUnityPath = fallbackLibUnityPath;
         }
     }
