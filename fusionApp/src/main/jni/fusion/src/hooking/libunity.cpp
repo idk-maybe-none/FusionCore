@@ -55,10 +55,34 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
         libUnityPath = fallbackLibUnityPath;
         return;
     }
-    void *target = xdl_dsym(libunity_handle,
-                            "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb",
-                            nullptr
-    );
+    static constexpr const char *SCRIPTING_METHOD_INVOKE_SYM =
+            "_Z23scripting_method_invoke18ScriptingMethodPtr18ScriptingObjectPtrR18ScriptingArgumentsP21ScriptingExceptionPtrb";
+
+    void *target = xdl_dsym(libunity_handle, SCRIPTING_METHOD_INVOKE_SYM, nullptr);
+
+    if (!target) {
+        log(LogLevel::WARN, TAG, "Symbol not found in libunity, trying .sym.so");
+
+        std::string symPath;
+        size_t lastSlash = libUnityPath.rfind('/');
+        if (lastSlash != std::string::npos) {
+            symPath = libUnityPath.substr(0, lastSlash + 1) + "libunity.sym.so";
+        }
+
+        if (!symPath.empty()) {
+            void *sym_handle = xdl_open(symPath.c_str(), XDL_ALWAYS_FORCE_LOAD);
+            if (sym_handle) {
+                void *sym_offset = xdl_dsym(sym_handle, SCRIPTING_METHOD_INVOKE_SYM, nullptr);
+                if (sym_offset) {
+                    target = reinterpret_cast<void*>(unity_info.dlpi_addr + reinterpret_cast<uintptr_t>(sym_offset));
+                    log_format(LogLevel::INFO, TAG, "Found symbol via .sym.so offset: 0x{:X}", reinterpret_cast<uintptr_t>(sym_offset));
+                }
+                xdl_close(sym_handle);
+            }
+        }
+    }
+
+
     if (!target)
     {
         log(LogLevel::ERROR, TAG,

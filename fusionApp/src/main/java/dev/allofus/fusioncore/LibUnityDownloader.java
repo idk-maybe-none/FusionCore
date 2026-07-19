@@ -29,6 +29,7 @@ public final class LibUnityDownloader {
 
     private static final String OLD_OUTPUT_FILE = "libunity.so";
     private static final String NEW_OUTPUT_FILE = "libunity_exp.so";
+    private static final String NEW_SYMM_OUTPUT_FILE = "libunity.sym.so";
 
     private static final Pattern OLD_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
     private static final Pattern NEW_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+\\.\\d+f\\d+)");
@@ -184,6 +185,8 @@ public final class LibUnityDownloader {
                 Log.w(TAG, "Downloaded libunity but failed to update cache metadata");
             }
 
+            downloadExperimentalSym(outputDir, baseUrl, downloadVersion, currentAbi);
+
             Log.i(TAG, "Successfully downloaded libunity (experimental) to " + outputLibUnity.getAbsolutePath());
             notifyDownloadFinished(progressListener, true, false);
             return true;
@@ -197,6 +200,66 @@ public final class LibUnityDownloader {
             }
             if (tempOutputLibUnity.exists() && !outputLibUnity.exists() && !tempOutputLibUnity.delete()) {
                 Log.w(TAG, "Failed to clean temporary libunity file: " + tempOutputLibUnity.getAbsolutePath());
+            }
+        }
+    }
+
+    private static void downloadExperimentalSym(File outputDir,
+                                                String baseUrl,
+                                                String downloadVersion,
+                                                String currentAbi) {
+        File outputSym = new File(outputDir, NEW_SYMM_OUTPUT_FILE);
+        if (outputSym.exists() && outputSym.length() > 0) {
+            Log.i(TAG, "Using existing libunity.sym.so at " + outputSym.getAbsolutePath());
+            return;
+        }
+
+        String url = baseUrl + downloadVersion + "/libunity.sym.so." + currentAbi;
+        Log.i(TAG, "Downloading libunity.sym.so from " + url);
+        HttpURLConnection connection = null;
+
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(30000);
+            connection.setInstanceFollowRedirects(true);
+
+            int statusCode = connection.getResponseCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                Log.w(TAG, "Failed to download libunity.sym.so, HTTP " + statusCode + " (symbol resolution unavailable)");
+                return;
+            }
+
+            File tempSym = new File(outputDir, NEW_SYMM_OUTPUT_FILE + ".download");
+            byte[] buffer = new byte[8192];
+
+            try (InputStream is = new BufferedInputStream(connection.getInputStream());
+                 FileOutputStream fos = new FileOutputStream(tempSym, false)) {
+                int count;
+                while ((count = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, count);
+                }
+            }
+
+            if (outputSym.exists() && !outputSym.delete()) {
+                Log.w(TAG, "Failed to replace existing libunity.sym.so");
+            }
+
+            if (tempSym.renameTo(outputSym)) {
+                Log.i(TAG, "Successfully downloaded libunity.sym.so to " + outputSym.getAbsolutePath());
+            } else {
+                Log.w(TAG, "Failed to move downloaded libunity.sym.so into place");
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to download libunity.sym.so (symbol resolution unavailable)", e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            File tempSym = new File(outputDir, NEW_SYMM_OUTPUT_FILE + ".download");
+            if (tempSym.exists() && !outputSym.exists() && !tempSym.delete()) {
+                Log.w(TAG, "Failed to clean temporary libunity.sym.so file");
             }
         }
     }

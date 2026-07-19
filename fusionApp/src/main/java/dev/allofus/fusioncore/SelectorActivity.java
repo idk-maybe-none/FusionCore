@@ -44,6 +44,7 @@ public class SelectorActivity extends Activity {
             "com.PhamThomas.NetLooter",
             "com.vincentb.MobControl",
             "com.AnotherAxiom.GorillaTag",
+            "com.ParityStudios.TrashTagV2",
             "com.cubsstash.scaryhorrormonkeys"
     };
 
