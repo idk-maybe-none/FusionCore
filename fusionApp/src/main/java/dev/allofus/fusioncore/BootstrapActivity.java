@@ -131,6 +131,7 @@ public class BootstrapActivity extends Activity {
                     var intent = new Intent(this, launcherClass);
                     intent.addCategory("com.oculus.intent.category.VR");
                     startActivity(intent);
+                    finish();
                 } catch (Throwable t) {
                     failAndFinish("Failed to launch target app's launcher activity: " + launcherClassName, t);
                 }
