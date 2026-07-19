@@ -28,6 +28,7 @@
     <package android:name="com.PhamThomas.NetLooter" />
     <package android:name="com.vincentb.MobControl" />
     <package android:name="com.AnotherAxiom.GorillaTag" />
+    <package android:name="com.schellgames.amongusvr" />
     <package android:name="tv.liv.controlcenter"/>
     <package android:name="com.ParityStudios.TrashTagV2" />
     <package android:name="com.cubsstash.scaryhorrormonkeys" />
