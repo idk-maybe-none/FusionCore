@@ -11,7 +11,7 @@
   <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
   <uses-feature android:name="android.software.home_screen" android:required="true" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-  <uses-feature android:name="android.hardware.vr.headtracking" android:required="false" android:version="1" />
+  <uses-feature android:name="android.hardware.vr.headtracking" android:required="true" android:version="1" />
   <uses-feature android:name="oculus.software.handtracking" android:required="false" />
   <uses-permission android:name="com.oculus.permission.HAND_TRACKING" />
   <queries>
@@ -28,6 +28,8 @@
     <package android:name="com.PhamThomas.NetLooter" />
     <package android:name="com.vincentb.MobControl" />
     <package android:name="com.AnotherAxiom.GorillaTag" />
+    <package android:name="tv.liv.controlcenter"/>
+    <package android:name="com.ParityStudios.TrashTagV2" />
     <package android:name="com.cubsstash.scaryhorrormonkeys" />
     <!-- It's no-name game because it doesn't has anticheat and I didn't wanted to spend some time to find/download a good game without anticheat on unity-->
     <package android:name="com.oculus.os.cm" />
@@ -43,7 +45,9 @@
     <meta-data android:name="com.unity.xr.oculus.LowOverheadMode" android:value="true"/>
     <meta-data android:name="com.unity.xr.oculus.LateLatching" android:value="false"/>
     <meta-data android:name="com.unity.xr.oculus.LateLatchingDebug" android:value="false"/>
-    <meta-data android:name="com.oculus.supportedDevices" android:value="quest|quest2|cambria"/>
+    <meta-data android:name="com.oculus.supportedDevices" android:value="quest|quest2|questpro|quest3|quest3s"/>
+    <meta-data android:name="com.oculus.ossplash" android:value="true"/>
+    <meta-data android:name="com.oculus.ossplash.background" android:value="black"/>
     <activity android:name="com.unity3d.player.UnityPlayerActivity" android:process=":vr" android:theme="@style/UnityThemeSelector" android:screenOrientation="fullUser" android:launchMode="singleTask" android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:resizeableActivity="false" android:hardwareAccelerated="false" android:windowLayoutInDisplayCutoutMode="shortEdges" android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
