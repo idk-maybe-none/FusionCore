@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+if not exist "logs" mkdir "logs"
+
 set "PIDS="
 
 :wait
@@ -14,7 +16,10 @@ for /f "tokens=2" %%a in ('adb shell ps ^| findstr "dev.allofus.fusioncoredev"')
 
     if !SEEN! == 0 (
         set "PIDS=!PIDS! %%a"
-        start "Logcat PID %%a" cmd /c "adb logcat --pid=%%a ^& echo. ^& echo Logcat for PID %%a ended. ^& pause"
+        for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TIMESTAMP=%%I"
+        set "LOGFILE=%~dp0logs\%%a_!TIMESTAMP!.log"
+        echo New process detected: PID %%a - logging to !LOGFILE!
+        start "Logcat PID %%a" powershell -NoProfile -Command "adb logcat --pid=%%a 2>&1 | Tee-Object -FilePath '!LOGFILE!'"
     )
 )
 timeout /t 2 >nul
