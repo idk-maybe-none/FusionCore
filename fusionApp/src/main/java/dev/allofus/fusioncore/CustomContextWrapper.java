@@ -90,7 +90,29 @@ public class CustomContextWrapper extends ContextWrapper {
 
     @Override
     public String getPackageName() {
+        if (isOculusOrMetaCaller()) {
+            return fusionContext.getPackageName();
+        }
         return targetPackage;
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (isOculusOrMetaCaller()) {
+            return fusionContext.getApplicationInfo();
+        }
+        return super.getApplicationInfo();
+    }
+
+    private static boolean isOculusOrMetaCaller() {
+        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        for (StackTraceElement frame : stack) {
+            String cn = frame.getClassName();
+            if (cn.startsWith("com.oculus.") || cn.startsWith("com.meta.")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
