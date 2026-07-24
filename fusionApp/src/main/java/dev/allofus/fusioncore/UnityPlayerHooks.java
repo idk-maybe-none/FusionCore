@@ -28,9 +28,7 @@ public class UnityPlayerHooks {
     public static final String[] UnityPlayerClassNames = new String[] {
             "com.unity3d.player.UnityPlayer",
             "com.unity3d.player.UnityPlayerForGameActivity",
-            "com.unity3d.player.UnityPlayerForActivityOrService",
-            "com.innersloth.spacemafia.EosUnityPlayerActivity",
-            "com.schellgames.airlock.EosUnityPlayerActivity"
+            "com.unity3d.player.UnityPlayerForActivityOrService"
     };
 
     // this is used to inject CustomContextWrapper into the game activity
