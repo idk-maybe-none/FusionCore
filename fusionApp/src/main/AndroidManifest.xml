@@ -34,6 +34,14 @@
     <package android:name="com.cubsstash.scaryhorrormonkeys" />
     <!-- It's no-name game because it doesn't has anticheat and I didn't wanted to spend some time to find/download a good game without anticheat on unity-->
     <package android:name="com.oculus.os.cm" />
+    <intent>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https"/>
+    </intent>
+    <intent>
+        <action android:name="android.support.customtabs.action.CustomTabsService"/>
+    </intent>
   </queries>
   <application android:label="@string/app_name" android:icon="@mipmap/app_icon" android:enableOnBackInvokedCallback="true" android:extractNativeLibs="true">
     <meta-data android:name="unity.splash-mode" android:value="0" />
