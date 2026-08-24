@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import dev.allofus.fusioncore.hooks.ClassLoaderHooks;
 import dev.allofus.fusioncore.hooks.InstrumentationHooks;
 import dev.allofus.fusioncore.hooks.PackageManagerHooks;
 import dev.allofus.fusioncore.hooks.UnityPlayerHooks;
+import dev.allofus.fusioncore.hooks.ActivityContextHooks;
 import dev.allofus.fusioncore.tools.FusionConfig;
 import dev.allofus.fusioncore.tools.FusionConfigStore;
 import dev.allofus.fusioncore.tools.LibUnityDownloader;
@@ -90,6 +92,7 @@ public class BootstrapActivity extends AppCompatActivity {
         }
 
         final int targetOrientation = resolveTargetOrientation(launcher);
+        final int targetTheme = resolveTargetTheme(launcher);
 
         Context gameContext;
         try {
@@ -121,7 +124,11 @@ public class BootstrapActivity extends AppCompatActivity {
             ClassLoaderHooks.installHooks(gameContext.getClassLoader());
             PackageManagerHooks.installHooks(getPackageManager());
             InstrumentationHooks.install();
-            UnityPlayerHooks.installHooks(gameContext);
+            UnityPlayerHooks.installHooks(gameContext, getApplicationContext(), targetPackage);
+            if (!ActivityContextHooks.installAttachBaseContextHook(
+                    gameContext.getClassLoader(), launcherClassName, gameContext, getApplicationContext(), targetPackage, targetTheme)) {
+                Log.w(TAG, "attachBaseContext hook installation failed, AppCompat may crash");
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to install base hooks", e);
         }
@@ -404,6 +411,19 @@ public class BootstrapActivity extends AppCompatActivity {
             return info.screenOrientation;
         } catch (NameNotFoundException e) {
             return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        }
+    }
+
+    private int resolveTargetTheme(ComponentName launcher) {
+        try {
+            ActivityInfo info = getPackageManager().getActivityInfo(launcher, 0);
+            if (info.theme != 0) {
+                return info.theme;
+            }
+            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(launcher.getPackageName(), 0);
+            return appInfo.theme;
+        } catch (NameNotFoundException e) {
+            return 0;
         }
     }
 

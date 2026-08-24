@@ -26,7 +26,7 @@ void* scripting_method_invoke_hook(void* method, void* obj, void* args, void* ex
 
 void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLibUnityPath) {
 
-    void *handle = dlopen(libUnityPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+    void *handle = dlopen(libUnityPath.c_str(), RTLD_NOW | RTLD_LOCAL);
     if (!handle)
     {
         log_format(LogLevel::ERROR, TAG,
@@ -40,6 +40,9 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
     if (!fs::exists(libunity_path) || !fs::exists(sym_path))
     {
         log_format(LogLevel::ERROR, TAG, "Failed to find libunity or libunity.sym.so at {}", libUnityPath.c_str());
+        dlclose(handle);
+        // reset libunity path
+        libUnityPath = fallbackLibUnityPath;
         return;
     }
 
@@ -51,12 +54,18 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
     if (rva == 0)
     {
         log(LogLevel::ERROR, TAG, "Failed to find scripting_method_invoke in libunity.sym.so");
+        dlclose(handle);
+        // reset libunity path
+        libUnityPath = fallbackLibUnityPath;
         return;
     }
 
     uintptr_t base = get_module_base(libUnityPath.c_str(), "JNI_OnLoad");
     if (base == 0) {
         log(LogLevel::ERROR, TAG, "Failed to find base address of libunity");
+        dlclose(handle);
+        // reset libunity path
+        libUnityPath = fallbackLibUnityPath;
         return;
     }
 
@@ -66,6 +75,7 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
         log_format(LogLevel::ERROR, TAG,
             "Failed to find target function for scripting_method_invoke_hook: ", dlerror());
 
+        dlclose(handle);
         // reset libunity path
         libUnityPath = fallbackLibUnityPath;
     }
@@ -82,6 +92,7 @@ void try_hook_libunity(std::string &libUnityPath, const std::string &fallbackLib
         else
         {
             log(LogLevel::ERROR, TAG, "Failed to hook scripting_method_invoke");
+            dlclose(handle);
             // reset libunity path
             libUnityPath = fallbackLibUnityPath;
         }

@@ -26,7 +26,7 @@ public class UnityPlayerHooks {
     private static final ThreadLocal<Activity> pendingActivity = new ThreadLocal<>();
 
     // this is used to inject CustomContextWrapper into the game activity
-    public static void installHooks(Context gameContext) {
+    public static void installHooks(Context gameContext, Context fusionContext, String targetPackage) {
         var classLoader = gameContext.getClassLoader();
         if (classLoader == null) {
             throw new IllegalStateException("ClassLoader is null");
@@ -76,6 +76,12 @@ public class UnityPlayerHooks {
                 @Override
                 public void beforeCall(Pine.CallFrame callFrame) {
                     try {
+                        Class<?> firstParamType = constructor.getParameterTypes()[0];
+                        if (!firstParamType.isAssignableFrom(CustomContextWrapper.class)) {
+                            Log.i(TAG, "Skipping context wrap for constructor with incompatible first param type "
+                                    + firstParamType.getName() + ": " + constructor);
+                            return;
+                        }
                         if (callFrame.args[0] == null || !(callFrame.args[0] instanceof Activity activity)) {
                             Log.w(TAG, "First argument is not a Activity, skipping before hook");
                             return;
@@ -86,7 +92,7 @@ public class UnityPlayerHooks {
                         // In UnityPlayerHooks beforeCall:
                         Log.i(TAG, "Constructor firing, context class: "
                                 + callFrame.args[0].getClass().getName());
-                        callFrame.args[0] = new CustomContextWrapper(gameContext, activity, activity);
+                        callFrame.args[0] = new CustomContextWrapper(gameContext, fusionContext, activity, targetPackage);
 
                         Log.i(TAG, "Setting activity fields in before hook!");
                         for (Field field : activityFields) {
